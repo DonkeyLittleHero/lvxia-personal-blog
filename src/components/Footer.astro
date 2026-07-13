@@ -1,0 +1,19 @@
+---
+import { navItems, siteConfig, withBase } from '../config';
+---
+
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <div>
+      <a class="brand" href={withBase('/')}><span class="brand-mark">驴</span><span>{siteConfig.name}</span></a>
+      <div style="margin-top: 10px">© {new Date().getFullYear()} · 把经验写下来，让增长有迹可循。</div>
+    </div>
+    <div class="footer-links">
+      {navItems.map((item) => <a href={withBase(item.href)}>{item.label}</a>)}
+      <a href={withBase('/rss.xml')}>RSS</a>
+      <a href={siteConfig.socials.github} target="_blank" rel="noreferrer">GitHub</a>
+      <a href={siteConfig.socials.bilibili} target="_blank" rel="noreferrer">Bilibili</a>
+      {siteConfig.email && <a href={`mailto:${siteConfig.email}`}>Email</a>}
+    </div>
+  </div>
+</footer>

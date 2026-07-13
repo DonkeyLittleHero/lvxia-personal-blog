@@ -1,0 +1,20 @@
+---
+interface Props {
+  class?: string;
+  accent?: 'cyan' | 'violet' | 'amber' | 'mint';
+  tilt?: boolean;
+  href?: string;
+}
+
+const { class: className = '', accent = 'cyan', tilt = true, href } = Astro.props;
+const Tag = href ? 'a' : 'div';
+---
+
+<Tag
+  class={`liquid-card accent-${accent} ${className}`}
+  data-tilt={tilt ? '' : undefined}
+  href={href}
+>
+  <span class="card-glare" aria-hidden="true"></span>
+  <slot />
+</Tag>

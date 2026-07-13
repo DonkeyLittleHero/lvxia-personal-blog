@@ -1,0 +1,42 @@
+---
+import { navItems, siteConfig, withBase } from '../config';
+import ThemeToggle from './ThemeToggle.astro';
+
+const currentPath = Astro.url.pathname;
+const isActive = (href: string) => {
+  const target = withBase(href);
+  return href === '/' ? currentPath === target || currentPath === `${target}/` : currentPath.startsWith(target);
+};
+---
+
+<header class="site-nav-wrap">
+  <div class="site-nav">
+    <a class="brand" href={withBase('/')} aria-label={`${siteConfig.name}首页`}>
+      <span class="brand-mark">驴</span>
+      <span>{siteConfig.name}</span>
+    </a>
+
+    <nav class="nav-links" id="mobile-menu" aria-label="主导航">
+      {navItems.map((item) => (
+        <a href={withBase(item.href)} class:list={['nav-link', { 'is-active': isActive(item.href) }]}>{item.label}</a>
+      ))}
+    </nav>
+
+    <div class="nav-actions">
+      <ThemeToggle />
+      <button class="menu-button" type="button" aria-label="打开导航" aria-expanded="false" aria-controls="mobile-menu">
+        <span aria-hidden="true">☰</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<script>
+  const button = document.querySelector('.menu-button');
+  const menu = document.querySelector('.nav-links');
+  button?.addEventListener('click', () => {
+    const expanded = button.getAttribute('aria-expanded') === 'true';
+    button.setAttribute('aria-expanded', String(!expanded));
+    menu?.classList.toggle('is-open', !expanded);
+  });
+</script>

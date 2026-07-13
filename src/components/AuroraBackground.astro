@@ -1,0 +1,89 @@
+<div class="aurora-scene" aria-hidden="true">
+  <canvas id="particle-field"></canvas>
+  <div class="aurora aurora--one"></div>
+  <div class="aurora aurora--two"></div>
+  <div class="grid-plane"></div>
+  <div class="data-ribbon ribbon--one"></div>
+  <div class="data-ribbon ribbon--two"></div>
+  <div class="cursor-glow"></div>
+</div>
+
+<script>
+  const scene = document.querySelector<HTMLElement>('.aurora-scene');
+  const canvas = document.querySelector<HTMLCanvasElement>('#particle-field');
+  const context = canvas?.getContext('2d');
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let width = 0;
+  let height = 0;
+  let animationFrame = 0;
+  let pointerX = 0.5;
+  let pointerY = 0.35;
+  interface Particle {
+    x: number;
+    y: number;
+    r: number;
+    speed: number;
+    alpha: number;
+    phase: number;
+  }
+  const particles: Particle[] = [];
+
+  const resize = () => {
+    if (!canvas || !context) return;
+    const ratio = Math.min(devicePixelRatio || 1, 2);
+    width = innerWidth;
+    height = innerHeight;
+    canvas.width = width * ratio;
+    canvas.height = height * ratio;
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+    context.setTransform(ratio, 0, 0, ratio, 0, 0);
+    particles.length = 0;
+    const count = Math.min(100, Math.max(36, Math.floor(width / 17)));
+    for (let index = 0; index < count; index += 1) {
+      particles.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        r: Math.random() * 1.25 + 0.2,
+        speed: Math.random() * 0.16 + 0.04,
+        alpha: Math.random() * 0.5 + 0.18,
+        phase: Math.random() * Math.PI * 2,
+      });
+    }
+  };
+
+  const draw = (time = 0) => {
+    if (!context) return;
+    context.clearRect(0, 0, width, height);
+    particles.forEach((particle) => {
+      if (!reduced) {
+        particle.y -= particle.speed;
+        particle.x += Math.sin(time * 0.0002 + particle.phase) * 0.035;
+        if (particle.y < -4) {
+          particle.y = height + 4;
+          particle.x = Math.random() * width;
+        }
+      }
+      const flicker = 0.65 + Math.sin(time * 0.001 + particle.phase) * 0.35;
+      context.beginPath();
+      context.fillStyle = `rgba(103, 232, 213, ${particle.alpha * flicker})`;
+      context.arc(particle.x, particle.y, particle.r, 0, Math.PI * 2);
+      context.fill();
+    });
+    if (!reduced) animationFrame = requestAnimationFrame(draw);
+  };
+
+  addEventListener('resize', resize, { passive: true });
+  addEventListener('pointermove', (event) => {
+    pointerX = event.clientX / innerWidth;
+    pointerY = event.clientY / innerHeight;
+    scene?.style.setProperty('--mx', `${pointerX * 100}%`);
+    scene?.style.setProperty('--my', `${pointerY * 100}%`);
+    scene?.style.setProperty('--px', `${(pointerX - 0.5) * 18}px`);
+    scene?.style.setProperty('--py', `${(pointerY - 0.5) * 12}px`);
+  }, { passive: true });
+
+  resize();
+  draw();
+  addEventListener('pagehide', () => cancelAnimationFrame(animationFrame), { once: true });
+</script>

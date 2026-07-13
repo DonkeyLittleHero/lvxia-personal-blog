@@ -1,0 +1,10 @@
+{
+  "name": "驴驴小侠 · 个人博客",
+  "short_name": "驴驴小侠",
+  "description": "在投放、AI与代码之间，记录真实增长。",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#030712",
+  "theme_color": "#071426",
+  "icons": []
+}

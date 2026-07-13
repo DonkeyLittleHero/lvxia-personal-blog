@@ -1,0 +1,12 @@
+<div class="scroll-progress" aria-hidden="true"></div>
+
+<script>
+  const bar = document.querySelector<HTMLElement>('.scroll-progress');
+  const update = () => {
+    const max = document.documentElement.scrollHeight - innerHeight;
+    const progress = max > 0 ? scrollY / max : 0;
+    bar?.style.setProperty('--scroll', `${progress * 100}%`);
+  };
+  addEventListener('scroll', update, { passive: true });
+  update();
+</script>

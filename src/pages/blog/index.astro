@@ -1,0 +1,69 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostCard from '../../components/PostCard.astro';
+import { siteConfig } from '../../config';
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
+const categories = ['全部', 'B站投放', '电商运营', 'AI创作', '编程手记'];
+---
+
+<BaseLayout title={`文章｜${siteConfig.name}`} description="驴驴小侠关于B站投放、电商运营、AI创作与编程实践的全部文章。">
+  <header class="page-hero container" data-reveal>
+    <span class="eyebrow">ALL NOTES</span>
+    <h1>文章与手记</h1>
+    <p>用搜索和分类快速找到你需要的内容。所有文章都以“下一步能做什么”为结尾。</p>
+  </header>
+  <section class="section" style="padding-top: 30px">
+    <div class="container">
+      <div class="filter-bar" data-reveal>
+        <label class="search-box">
+          <span class="sr-only">搜索文章</span>
+          <input id="post-search" type="search" autocomplete="off" placeholder="搜索标题、主题或标签…" />
+        </label>
+        <div class="filter-buttons" aria-label="文章分类">
+          {categories.map((category, index) => (
+            <button class:list={['filter-button', { 'is-active': index === 0 }]} type="button" data-filter={category}>{category}</button>
+          ))}
+        </div>
+      </div>
+      <div class="post-grid" id="post-grid">
+        {posts.map((post) => <PostCard post={post} searchable />)}
+      </div>
+      <div class="empty-state" id="empty-state">
+        <h2>没有找到相关文章</h2>
+        <p>换一个关键词或分类试试。</p>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const search = document.querySelector('#post-search');
+    const buttons = Array.from(document.querySelectorAll('[data-filter]'));
+    const cards = Array.from(document.querySelectorAll('[data-post]'));
+    const empty = document.querySelector('#empty-state');
+    let activeCategory = '全部';
+
+    const update = () => {
+      const query = search instanceof HTMLInputElement ? search.value.trim().toLowerCase() : '';
+      let visible = 0;
+      cards.forEach((card) => {
+        if (!(card instanceof HTMLElement)) return;
+        const categoryMatch = activeCategory === '全部' || card.dataset.category === activeCategory;
+        const searchMatch = !query || (card.dataset.search || '').includes(query);
+        const show = categoryMatch && searchMatch;
+        card.hidden = !show;
+        if (show) visible += 1;
+      });
+      if (empty instanceof HTMLElement) empty.style.display = visible ? 'none' : 'block';
+    };
+
+    search?.addEventListener('input', update);
+    buttons.forEach((button) => button.addEventListener('click', () => {
+      activeCategory = button.getAttribute('data-filter') || '全部';
+      buttons.forEach((item) => item.classList.toggle('is-active', item === button));
+      update();
+    }));
+  </script>
+</BaseLayout>

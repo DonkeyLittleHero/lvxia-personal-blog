@@ -1,0 +1,34 @@
+---
+import { siteConfig } from '../config';
+const giscus = siteConfig.giscus;
+---
+
+<section class="comments-panel liquid-card accent-cyan" aria-labelledby="comments-title">
+  <div>
+    <span class="eyebrow">DISCUSSION</span>
+    <h2 id="comments-title">一起聊聊</h2>
+  </div>
+  {giscus.enabled && giscus.repo && giscus.repoId && giscus.categoryId ? (
+    <script is:inline
+      src="https://giscus.app/client.js"
+      data-repo={giscus.repo}
+      data-repo-id={giscus.repoId}
+      data-category={giscus.category}
+      data-category-id={giscus.categoryId}
+      data-mapping="pathname"
+      data-strict="0"
+      data-reactions-enabled="1"
+      data-emit-metadata="0"
+      data-input-position="top"
+      data-theme="transparent_dark"
+      data-lang="zh-CN"
+      crossorigin="anonymous"
+      async
+    ></script>
+  ) : (
+    <div class="comments-placeholder">
+      <span>◌</span>
+      <p>评论功能已预留。将网站仓库开启 GitHub Discussions，并在 <code>src/config.ts</code> 填入 Giscus 参数即可启用。</p>
+    </div>
+  )}
+</section>

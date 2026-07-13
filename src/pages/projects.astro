@@ -1,0 +1,32 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import GlassCard from '../components/GlassCard.astro';
+import { projects } from '../data/projects';
+import { siteConfig } from '../config';
+---
+
+<BaseLayout title={`项目｜${siteConfig.name}`} description="驴驴小侠正在构建的IP动画、投放数据与小游戏项目。">
+  <header class="page-hero container" data-reveal>
+    <span class="eyebrow">BUILD IN PUBLIC</span>
+    <h1>把想法做成作品</h1>
+    <p>这里保留项目从模糊想法、第一版原型到持续迭代的全过程，也诚实记录暂时没有解决的问题。</p>
+  </header>
+  <section class="section" style="padding-top: 30px">
+    <div class="container">
+      <div class="project-grid">{projects.map((project) => <ProjectCard project={project} />)}</div>
+    </div>
+  </section>
+  <section class="section">
+    <div class="container">
+      <GlassCard class="about-panel" accent="cyan">
+        <div><span class="eyebrow">MY PROCESS</span><h2>每一个项目，都从一个可验证的小问题开始。</h2></div>
+        <div class="principle-list">
+          <div class="principle"><strong>01 · 定义</strong><span>明确谁遇到了什么问题，以及怎样算解决。</span></div>
+          <div class="principle"><strong>02 · 原型</strong><span>先做最小闭环，再讨论复杂功能。</span></div>
+          <div class="principle"><strong>03 · 复盘</strong><span>用真实反馈决定保留、修改或停止。</span></div>
+        </div>
+      </GlassCard>
+    </div>
+  </section>
+</BaseLayout>

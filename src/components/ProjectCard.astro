@@ -1,0 +1,36 @@
+---
+import GlassCard from './GlassCard.astro';
+
+interface Project {
+  title: string;
+  description: string;
+  status: string;
+  year: string;
+  tags: readonly string[];
+  accent: 'cyan' | 'violet' | 'amber' | 'mint';
+  icon: string;
+  href: string;
+  highlights: readonly string[];
+}
+
+const { project } = Astro.props as { project: Project };
+---
+
+<GlassCard class="project-card" accent={project.accent}>
+  <div class="project-card__top">
+    <span class="project-mark">{project.icon}</span>
+    <div class="pill"><i class="signal"></i>{project.status}</div>
+  </div>
+  <div>
+    <p class="project-year">BUILD / {project.year}</p>
+    <h3>{project.title}</h3>
+    <p>{project.description}</p>
+  </div>
+  <ul>
+    {project.highlights.map((highlight) => <li>{highlight}</li>)}
+  </ul>
+  <div class="project-card__footer">
+    <div>{project.tags.slice(0, 2).map((tag) => <span style="margin-right: 8px">#{tag}</span>)}</div>
+    {project.href ? <a href={project.href}>查看项目 ↗</a> : <span>持续记录中</span>}
+  </div>
+</GlassCard>

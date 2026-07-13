@@ -1,0 +1,41 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import GlassCard from './GlassCard.astro';
+import { withBase } from '../config';
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+  featured?: boolean;
+  searchable?: boolean;
+}
+
+const { post, featured = false, searchable = false } = Astro.props;
+const readingMinutes = Math.max(2, Math.ceil((post.body?.length || 0) / 500));
+const href = withBase(`/blog/${post.id}/`);
+const searchText = `${post.data.title} ${post.data.description} ${post.data.category} ${post.data.tags.join(' ')}`.toLowerCase();
+---
+
+<article
+  class:list={['post-card-wrap', { 'post-card-wrap--featured': featured }]}
+  data-post={searchable ? '' : undefined}
+  data-category={searchable ? post.data.category : undefined}
+  data-search={searchable ? searchText : undefined}
+  data-reveal
+>
+  <GlassCard class="post-card" accent={post.data.accent} href={href}>
+    <div class="post-card__top">
+      <span class="pill">{post.data.category}</span>
+      <time datetime={post.data.publishedAt.toISOString()}>
+        {post.data.publishedAt.toLocaleDateString('zh-CN', { year: 'numeric', month: 'short', day: 'numeric' })}
+      </time>
+    </div>
+    <h3>{post.data.title}</h3>
+    <p>{post.data.description}</p>
+    <div class="post-card__footer">
+      <div>
+        {post.data.tags.slice(0, 2).map((tag) => <span style="margin-right: 8px">#{tag}</span>)}
+      </div>
+      <span class="read-time">{readingMinutes} 分钟 ↗</span>
+    </div>
+  </GlassCard>
+</article>
