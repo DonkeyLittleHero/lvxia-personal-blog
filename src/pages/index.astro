@@ -14,44 +14,100 @@ const latestPost = posts[0];
 ---
 
 <BaseLayout>
-  <section class="hero">
+  <section class="hero hero--lab" data-hero-scene>
+    <div class="hero-light hero-light--cyan" aria-hidden="true"></div>
+    <div class="hero-light hero-light--violet" aria-hidden="true"></div>
+    <div class="hero-wave hero-wave--one" aria-hidden="true"></div>
+    <div class="hero-wave hero-wave--two" aria-hidden="true"></div>
+
     <div class="container hero-grid">
       <div class="hero-copy" data-reveal>
         <span class="eyebrow">{siteConfig.heroEyebrow}</span>
-        <h1>{siteConfig.heroTitle.map((line) => <span>{line}</span>)}</h1>
+        <h1 class="hero-title">
+          <span>在投放、AI与</span>
+          <span>代码之间，</span>
+          <span>记录真实增长</span>
+        </h1>
         <p class="hero-description">{siteConfig.heroDescription}</p>
         <div class="hero-actions">
           <a class="btn btn--primary" href={withBase('/blog/')}>阅读最新文章 <span>↗</span></a>
-          <a class="btn btn--ghost" href={withBase('/projects/')}>查看正在做的项目</a>
+          <a class="btn btn--ghost" href={withBase('/projects/')}>看看我的项目</a>
         </div>
         <div class="topic-row" aria-label="博客主题">
-          {topics.map((topic) => <span class={`pill accent-${topic.accent}`}>{topic.icon} {topic.label}</span>)}
+          {topics.map((topic) => <a class={`pill hero-pill accent-${topic.accent}`} href={withBase('/blog/')}>{topic.icon} {topic.label}</a>)}
         </div>
       </div>
 
       <div class="hero-visual" data-reveal>
-        <div class="orbital-stage" aria-hidden="true">
-          <div class="orbital-ring"></div>
-          <div class="hero-orb"></div>
+        <div class="orbital-stage lab-orb-stage" aria-hidden="true">
+          <div class="orb-shadow"></div>
+          <div class="orbital-ring orbital-ring--outer"></div>
+          <div class="orbital-ring orbital-ring--inner"></div>
+          <div class="hero-orb lab-orb">
+            <span class="orb-highlight"></span>
+            <span class="orb-scanline"></span>
+          </div>
+          <div class="orb-platform"></div>
         </div>
+
+        <GlassCard class="insight-card insight-card--workflow floating-card" accent="cyan">
+          <div class="insight-icon" aria-hidden="true">⬡</div>
+          <strong>正在探索</strong>
+          <h3>AI自动化创作流</h3>
+          <p>让内容生产更高效，让创意更可复制。</p>
+          <div class="micro-dots" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+        </GlassCard>
+
+        <GlassCard class="insight-card insight-card--growth floating-card" accent="violet">
+          <div class="floating-card__meta"><span>真实增长</span><span>近90天</span></div>
+          <div class="mini-chart" aria-hidden="true">
+            <span style="--h: 28%"></span>
+            <span style="--h: 42%"></span>
+            <span style="--h: 38%"></span>
+            <span style="--h: 55%"></span>
+            <span style="--h: 68%"></span>
+            <span style="--h: 62%"></span>
+            <span style="--h: 82%"></span>
+          </div>
+          <div class="growth-number">+128%</div>
+          <p>综合增长</p>
+        </GlassCard>
+
         {latestPost && (
-          <GlassCard class="floating-card floating-card--one" accent={latestPost.data.accent} href={withBase(`/blog/${latestPost.id}/`)}>
+          <GlassCard class="latest-preview floating-card" accent={latestPost.data.accent} href={withBase(`/blog/${latestPost.id}/`)}>
             <div class="floating-card__meta">
-              <span><i class="signal"></i>NEW POST</span>
-              <span>{latestPost.data.category}</span>
+              <span><i class="signal"></i>最新文章</span>
+              <span>刚刚发布</span>
             </div>
-            <h3>{latestPost.data.title}</h3>
-            <p>{latestPost.data.description}</p>
+            <div class="latest-preview__body">
+              <div class="latest-preview__thumb" aria-hidden="true"></div>
+              <div>
+                <h3>{latestPost.data.title}</h3>
+                <p>{latestPost.data.description}</p>
+                <div class="article-meta">
+                  <span>{latestPost.data.category}</span>
+                  <span>8 分钟阅读</span>
+                </div>
+              </div>
+            </div>
           </GlassCard>
         )}
-        <GlassCard class="floating-card floating-card--two" accent="violet">
-          <div class="floating-card__meta"><span>NOW BUILDING</span><span>2026</span></div>
-          <h3>让 IP 动画创作流程自动运转</h3>
-          <p>角色一致性、分镜、配音与多平台导出。</p>
-        </GlassCard>
       </div>
     </div>
   </section>
+
+  <script>
+    const heroScene = document.querySelector<HTMLElement>('[data-hero-scene]');
+    heroScene?.addEventListener('pointermove', (event) => {
+      const rect = heroScene.getBoundingClientRect();
+      const x = (event.clientX - rect.left) / rect.width;
+      const y = (event.clientY - rect.top) / rect.height;
+      heroScene.style.setProperty('--hero-x', `${(x - 0.5) * 24}px`);
+      heroScene.style.setProperty('--hero-y', `${(y - 0.5) * 18}px`);
+      heroScene.style.setProperty('--hero-glow-x', `${x * 100}%`);
+      heroScene.style.setProperty('--hero-glow-y', `${y * 100}%`);
+    }, { passive: true });
+  </script>
 
   <section class="section" id="featured">
     <div class="container">
