@@ -10,7 +10,78 @@ import { siteConfig, topics, withBase } from '../config';
 const posts = (await getCollection('blog', ({ data }) => !data.draft))
   .sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
 const featuredPosts = posts.filter((post) => post.data.featured).slice(0, 3);
-const latestPost = posts[0];
+const planetStations = [
+  {
+    id: 'blog',
+    title: '文章星球',
+    label: '复盘和方法论',
+    accent: '#25e7ff',
+    size: 184,
+    x: 66,
+    y: 30,
+    options: [
+      { label: '阅读最新文章', href: '/blog/' },
+      { label: '查看精选复盘', href: '/#featured' },
+      { label: '订阅 RSS', href: '/rss.xml' },
+    ],
+  },
+  {
+    id: 'projects',
+    title: '项目星球',
+    label: '正在构建',
+    accent: '#8d7cff',
+    size: 128,
+    x: 84,
+    y: 58,
+    options: [
+      { label: '项目列表', href: '/projects/' },
+      { label: 'IP 动画流水线', href: '/projects/' },
+      { label: '小游戏原型', href: '/projects/' },
+    ],
+  },
+  {
+    id: 'ai',
+    title: 'AI 创作星',
+    label: '自动化创作',
+    accent: '#62f6e4',
+    size: 104,
+    x: 47,
+    y: 64,
+    options: [
+      { label: 'AI 工作流文章', href: '/blog/ai-ip-animation-pipeline/' },
+      { label: '内容复盘流程', href: '/blog/content-review-loop/' },
+      { label: '查看项目沉淀', href: '/projects/' },
+    ],
+  },
+  {
+    id: 'data',
+    title: '数据星站',
+    label: '投放增长',
+    accent: '#ffbf69',
+    size: 92,
+    x: 76,
+    y: 76,
+    options: [
+      { label: 'B站投放清单', href: '/blog/bilibili-launch-checklist/' },
+      { label: '电商指标树', href: '/blog/ecommerce-metric-tree/' },
+      { label: '增长复盘', href: '/blog/' },
+    ],
+  },
+  {
+    id: 'about',
+    title: '身份星',
+    label: '认识我',
+    accent: '#73eab1',
+    size: 82,
+    x: 55,
+    y: 18,
+    options: [
+      { label: '关于驴驴小侠', href: '/about/' },
+      { label: '我的方法论', href: '/about/' },
+      { label: 'GitHub', href: siteConfig.socials.github },
+    ],
+  },
+];
 ---
 
 <BaseLayout>
@@ -38,55 +109,99 @@ const latestPost = posts[0];
         </div>
       </div>
 
-      <div class="hero-visual hero-visual--overlay" data-reveal>
-        <GlassCard class="insight-card insight-card--workflow floating-card" accent="cyan">
-          <div class="insight-icon" aria-hidden="true">⬡</div>
-          <strong>正在探索</strong>
-          <h3>AI自动化创作流</h3>
-          <p>让内容生产更高效，让创意更可复制。</p>
-          <div class="micro-dots" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
-        </GlassCard>
+      <div class="hero-visual hero-visual--universe" data-reveal>
+        <div class="universe-stage" data-universe aria-label="可交互星球导航">
+          <div class="starfield starfield--near" aria-hidden="true"></div>
+          <div class="starfield starfield--far" aria-hidden="true"></div>
+          <div class="orbit-path orbit-path--one" aria-hidden="true"></div>
+          <div class="orbit-path orbit-path--two" aria-hidden="true"></div>
+          <div class="orbit-path orbit-path--three" aria-hidden="true"></div>
 
-        <GlassCard class="insight-card insight-card--growth floating-card" accent="violet">
-          <div class="floating-card__meta"><span>真实增长</span><span>近90天</span></div>
-          <div class="mini-chart" aria-hidden="true">
-            <span style="--h: 28%"></span>
-            <span style="--h: 42%"></span>
-            <span style="--h: 38%"></span>
-            <span style="--h: 55%"></span>
-            <span style="--h: 68%"></span>
-            <span style="--h: 62%"></span>
-            <span style="--h: 82%"></span>
-          </div>
-          <div class="growth-number">+128%</div>
-          <p>综合增长</p>
-        </GlassCard>
+          {planetStations.map((planet) => (
+            <button
+              class={`planet planet--${planet.id}`}
+              type="button"
+              data-planet={planet.id}
+              style={`--planet-x:${planet.x}%; --planet-y:${planet.y}%; --planet-size:${planet.size}px; --planet-accent:${planet.accent};`}
+              aria-expanded="false"
+              aria-controls={`planet-panel-${planet.id}`}
+            >
+              <span class="planet__halo" aria-hidden="true"></span>
+              <span class="planet__orbit" aria-hidden="true"></span>
+              <span class="planet__body" aria-hidden="true">
+                <span class="planet__shine"></span>
+                <span class="planet__scan"></span>
+              </span>
+              <span class="planet__label"><strong>{planet.title}</strong><small>{planet.label}</small></span>
+            </button>
+          ))}
 
-        {latestPost && (
-          <GlassCard class="latest-preview floating-card" accent={latestPost.data.accent} href={withBase(`/blog/${latestPost.id}/`)}>
-            <div class="floating-card__meta">
-              <span><i class="signal"></i>最新文章</span>
-              <span>刚刚发布</span>
-            </div>
-            <div class="latest-preview__body">
-              <div class="latest-preview__thumb" aria-hidden="true"></div>
-              <div>
-                <h3>{latestPost.data.title}</h3>
-                <p>{latestPost.data.description}</p>
-                <div class="article-meta">
-                  <span>{latestPost.data.category}</span>
-                  <span>8 分钟阅读</span>
-                </div>
+          {planetStations.map((planet) => (
+            <div
+              class={`planet-console planet-console--${planet.id}`}
+              id={`planet-panel-${planet.id}`}
+              data-console={planet.id}
+              style={`--planet-x:${planet.x}%; --planet-y:${planet.y}%; --planet-size:${planet.size}px; --planet-accent:${planet.accent};`}
+            >
+              <span class="console-kicker">FUNCTION DOCK</span>
+              <h3>{planet.title}</h3>
+              <p>{planet.label}：选择一个入口继续探索。</p>
+              <div class="console-actions">
+                {planet.options.map((option) => (
+                  <a href={option.href.startsWith('http') ? option.href : withBase(option.href)}>{option.label}<span>↗</span></a>
+                ))}
               </div>
             </div>
-          </GlassCard>
-        )}
+          ))}
+        </div>
       </div>
     </div>
   </section>
 
   <script>
     const heroScene = document.querySelector<HTMLElement>('[data-hero-scene]');
+    const universe = document.querySelector<HTMLElement>('[data-universe]');
+    const planets = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-planet]'));
+    const consoles = Array.from(document.querySelectorAll<HTMLElement>('[data-console]'));
+    let activePlanet = '';
+
+    const closePlanet = () => {
+      activePlanet = '';
+      universe?.removeAttribute('data-active');
+      planets.forEach((planet) => {
+        planet.classList.remove('is-active');
+        planet.setAttribute('aria-expanded', 'false');
+      });
+      consoles.forEach((consolePanel) => consolePanel.classList.remove('is-active'));
+    };
+
+    const openPlanet = (id: string) => {
+      if (activePlanet === id) {
+        closePlanet();
+        return;
+      }
+      activePlanet = id;
+      universe?.setAttribute('data-active', id);
+      planets.forEach((planet) => {
+        const isActive = planet.dataset.planet === id;
+        planet.classList.toggle('is-active', isActive);
+        planet.setAttribute('aria-expanded', String(isActive));
+      });
+      consoles.forEach((consolePanel) => {
+        consolePanel.classList.toggle('is-active', consolePanel.dataset.console === id);
+      });
+    };
+
+    planets.forEach((planet) => {
+      planet.addEventListener('click', () => {
+        if (planet.dataset.planet) openPlanet(planet.dataset.planet);
+      });
+    });
+
+    addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') closePlanet();
+    });
+
     heroScene?.addEventListener('pointermove', (event) => {
       const rect = heroScene.getBoundingClientRect();
       const x = (event.clientX - rect.left) / rect.width;
@@ -95,6 +210,10 @@ const latestPost = posts[0];
       heroScene.style.setProperty('--hero-y', `${(y - 0.5) * 18}px`);
       heroScene.style.setProperty('--hero-glow-x', `${x * 100}%`);
       heroScene.style.setProperty('--hero-glow-y', `${y * 100}%`);
+      universe?.style.setProperty('--fly-x', `${(x - 0.5) * 54}px`);
+      universe?.style.setProperty('--fly-y', `${(y - 0.5) * 40}px`);
+      universe?.style.setProperty('--tilt-x', `${(0.5 - y) * 8}deg`);
+      universe?.style.setProperty('--tilt-y', `${(x - 0.5) * 10}deg`);
     }, { passive: true });
   </script>
 
