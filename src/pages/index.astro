@@ -14,7 +14,7 @@ const latestPost = posts[0];
 ---
 
 <BaseLayout>
-  <section class="hero hero--lab" data-hero-scene>
+  <section class="hero hero--lab" data-hero-scene style={`--hero-bg: url("${withBase('/hero-lab-bg.png')}")`}>
     <div class="hero-light hero-light--cyan" aria-hidden="true"></div>
     <div class="hero-light hero-light--violet" aria-hidden="true"></div>
     <div class="hero-wave hero-wave--one" aria-hidden="true"></div>
@@ -38,18 +38,7 @@ const latestPost = posts[0];
         </div>
       </div>
 
-      <div class="hero-visual" data-reveal>
-        <div class="orbital-stage lab-orb-stage" aria-hidden="true">
-          <div class="orb-shadow"></div>
-          <div class="orbital-ring orbital-ring--outer"></div>
-          <div class="orbital-ring orbital-ring--inner"></div>
-          <div class="hero-orb lab-orb">
-            <span class="orb-highlight"></span>
-            <span class="orb-scanline"></span>
-          </div>
-          <div class="orb-platform"></div>
-        </div>
-
+      <div class="hero-visual hero-visual--overlay" data-reveal>
         <GlassCard class="insight-card insight-card--workflow floating-card" accent="cyan">
           <div class="insight-icon" aria-hidden="true">⬡</div>
           <strong>正在探索</strong>
