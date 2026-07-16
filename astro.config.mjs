@@ -20,6 +20,7 @@ export default defineConfig({
   vite: {
     build: {
       cssMinify: 'lightningcss',
+      chunkSizeWarningLimit: 700,
     },
   },
 });

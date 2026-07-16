@@ -17,13 +17,13 @@ interface Props {
 const {
   title = siteConfig.fullTitle,
   description = siteConfig.description,
-  image = withBase('/favicon.svg'),
+  image = withBase('/og.jpg'),
   type = 'website',
   publishedAt,
 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site || Astro.url.origin);
-const themeScript = `(() => { try { const saved = localStorage.getItem('theme'); const preferred = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'; document.documentElement.dataset.theme = saved || preferred; } catch (_) {} })();`;
+const themeScript = `(() => { try { const saved = localStorage.getItem('theme'); document.documentElement.dataset.theme = saved || 'dark'; } catch (_) {} })();`;
 ---
 
 <!doctype html>
@@ -47,6 +47,7 @@ const themeScript = `(() => { try { const saved = localStorage.getItem('theme');
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={new URL(image, Astro.url)} />
     {publishedAt && <meta property="article:published_time" content={publishedAt.toISOString()} />}
     <script is:inline set:html={themeScript}></script>
     <title>{title}</title>

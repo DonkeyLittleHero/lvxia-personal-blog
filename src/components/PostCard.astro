@@ -23,6 +23,12 @@ const searchText = `${post.data.title} ${post.data.description} ${post.data.cate
   data-reveal
 >
   <GlassCard class="post-card" accent={post.data.accent} href={href}>
+    {post.data.coverImage && (
+      <div class="post-card__media">
+        <img src={post.data.coverImage} alt={post.data.coverAlt || `${post.data.title}文章封面`} loading="lazy" />
+      </div>
+    )}
+    <div class="post-card__body">
     <div class="post-card__top">
       <span class="pill">{post.data.category}</span>
       <time datetime={post.data.publishedAt.toISOString()}>
@@ -36,6 +42,7 @@ const searchText = `${post.data.title} ${post.data.description} ${post.data.cate
         {post.data.tags.slice(0, 2).map((tag) => <span style="margin-right: 8px">#{tag}</span>)}
       </div>
       <span class="read-time">{readingMinutes} 分钟 ↗</span>
+    </div>
     </div>
   </GlassCard>
 </article>

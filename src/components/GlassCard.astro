@@ -15,6 +15,7 @@ const Tag = href ? 'a' : 'div';
   data-tilt={tilt ? '' : undefined}
   href={href}
 >
+  <span class="card-depth" aria-hidden="true"></span>
   <span class="card-glare" aria-hidden="true"></span>
   <slot />
 </Tag>

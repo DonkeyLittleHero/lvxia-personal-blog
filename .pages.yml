@@ -1,0 +1,110 @@
+media:
+  - name: article_images
+    label: 文章图片
+    input: public/images/uploads
+    output: /lvxia-personal-blog/images/uploads
+    extensions: [jpg, jpeg, png, webp, gif]
+    categories: [image]
+    rename: safe
+
+content:
+  - name: posts
+    label: 文章管理
+    type: collection
+    path: src/content/blog
+    format: yaml-frontmatter
+    filename: "{primary}.md"
+    view:
+      fields: [title, publishedAt, category, draft, featured]
+      primary: title
+      sort: [publishedAt, title, category]
+      search: [title, description, category, tags]
+      default:
+        sort: publishedAt
+        order: desc
+    fields:
+      - name: title
+        label: 文章标题
+        type: string
+        required: true
+      - name: description
+        label: 摘要
+        type: text
+        required: true
+        description: 用一到两句话说明读者能获得什么。
+      - name: publishedAt
+        label: 发布日期
+        type: date
+        required: true
+        options:
+          format: yyyy-MM-dd
+      - name: updatedAt
+        label: 更新日期
+        type: date
+        required: false
+        default: ""
+        options:
+          format: yyyy-MM-dd
+      - name: category
+        label: 分类
+        type: select
+        required: true
+        options:
+          values: [B站投放, 电商运营, AI创作, 编程手记]
+      - name: tags
+        label: 标签
+        type: string
+        list: true
+      - name: coverImage
+        label: 文章封面
+        type: image
+        required: false
+        options:
+          media: article_images
+      - name: coverAlt
+        label: 封面说明
+        type: string
+        required: false
+        description: 简短描述封面内容，便于无障碍阅读。
+      - name: featured
+        label: 首页精选
+        type: boolean
+        default: false
+      - name: draft
+        label: 保存为草稿
+        type: boolean
+        default: true
+        description: 开启后网站不会公开显示这篇文章。
+      - name: accent
+        label: 主题色
+        type: select
+        default: cyan
+        options:
+          values:
+            - name: cyan
+              label: 青绿
+            - name: amber
+              label: 暖金
+            - name: violet
+              label: 紫色
+            - name: mint
+              label: 薄荷绿
+      - name: body
+        label: 正文
+        type: rich-text
+        required: true
+        options:
+          format: markdown
+          switcher: true
+          media: article_images
+
+settings:
+  content:
+    merge: true
+  commit:
+    identity: user
+    templates:
+      create: "content: 发布 {filename}"
+      update: "content: 更新 {filename}"
+      delete: "content: 删除 {filename}"
+      rename: "content: 重命名 {oldFilename} 为 {newFilename}"

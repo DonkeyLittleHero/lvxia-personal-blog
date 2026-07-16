@@ -17,6 +17,7 @@ const minutes = Math.max(2, Math.ceil((post.body?.length || 0) / 500));
 <BaseLayout
   title={`${post.data.title}｜${siteConfig.name}`}
   description={post.data.description}
+  image={post.data.coverImage || withBase('/og.jpg')}
   type="article"
   publishedAt={post.data.publishedAt}
 >
@@ -33,6 +34,11 @@ const minutes = Math.max(2, Math.ceil((post.body?.length || 0) / 500));
       </div>
       <div class="article-tags">{post.data.tags.map((tag) => <span class="tag">#{tag}</span>)}</div>
     </header>
+    {post.data.coverImage && (
+      <figure class="article-cover" data-reveal>
+        <img src={post.data.coverImage} alt={post.data.coverAlt || `${post.data.title}文章封面`} />
+      </figure>
+    )}
     <div class="prose"><Content /></div>
     <Comments />
   </article>

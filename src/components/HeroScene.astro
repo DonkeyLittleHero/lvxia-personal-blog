@@ -1,0 +1,187 @@
+---
+interface Props {
+  image: string;
+}
+
+const { image } = Astro.props;
+---
+
+<div class="hero-stage" aria-hidden="true">
+  <img class="hero-portrait" src={image} alt="" width="1024" height="1536" fetchpriority="high" />
+  <canvas id="hero-webgl"></canvas>
+  <div class="hero-depth-lines"></div>
+</div>
+
+<script>
+  import {
+    AdditiveBlending,
+    BufferAttribute,
+    BufferGeometry,
+    Color,
+    EdgesGeometry,
+    Group,
+    IcosahedronGeometry,
+    LineBasicMaterial,
+    LineSegments,
+    Mesh,
+    MeshBasicMaterial,
+    PerspectiveCamera,
+    Points,
+    PointsMaterial,
+    Scene,
+    TorusGeometry,
+    Vector2,
+    WebGLRenderer,
+  } from 'three';
+
+  const canvas = document.querySelector<HTMLCanvasElement>('#hero-webgl');
+  const host = canvas?.closest<HTMLElement>('.hero-stage');
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (canvas && host) {
+    try {
+      const scene = new Scene();
+      const camera = new PerspectiveCamera(44, 1, 0.1, 50);
+      const renderer = new WebGLRenderer({
+        canvas,
+        alpha: true,
+        antialias: true,
+        powerPreference: 'high-performance',
+      });
+      const world = new Group();
+      const orbitGroup = new Group();
+      const pointer = new Vector2();
+      const targetPointer = new Vector2();
+      const startedAt = performance.now();
+      let frame = 0;
+      let active = true;
+
+      camera.position.set(0, 0, 7.2);
+      scene.add(world);
+      world.add(orbitGroup);
+
+      const particleCount = innerWidth < 700 ? 420 : 820;
+      const particlePositions = new Float32Array(particleCount * 3);
+      const particleColors = new Float32Array(particleCount * 3);
+      const cool = new Color('#5ce1d0');
+      const warm = new Color('#e8bd72');
+
+      for (let index = 0; index < particleCount; index += 1) {
+        const radius = 1.4 + Math.random() * 6.2;
+        const angle = Math.random() * Math.PI * 2;
+        const depth = (Math.random() - 0.5) * 7;
+        const offset = index * 3;
+        particlePositions[offset] = Math.cos(angle) * radius + 1.1;
+        particlePositions[offset + 1] = Math.sin(angle) * radius * 0.65;
+        particlePositions[offset + 2] = depth;
+        const color = Math.random() > 0.72 ? warm : cool;
+        particleColors[offset] = color.r;
+        particleColors[offset + 1] = color.g;
+        particleColors[offset + 2] = color.b;
+      }
+
+      const particleGeometry = new BufferGeometry();
+      particleGeometry.setAttribute('position', new BufferAttribute(particlePositions, 3));
+      particleGeometry.setAttribute('color', new BufferAttribute(particleColors, 3));
+      const particles = new Points(
+        particleGeometry,
+        new PointsMaterial({
+          size: innerWidth < 700 ? 0.032 : 0.026,
+          sizeAttenuation: true,
+          transparent: true,
+          opacity: 0.76,
+          vertexColors: true,
+          blending: AdditiveBlending,
+          depthWrite: false,
+        }),
+      );
+      world.add(particles);
+
+      const ringMaterial = new MeshBasicMaterial({
+        color: '#74eadb',
+        transparent: true,
+        opacity: 0.28,
+        blending: AdditiveBlending,
+        depthWrite: false,
+      });
+      const warmRingMaterial = ringMaterial.clone();
+      warmRingMaterial.color.set('#e8bd72');
+      warmRingMaterial.opacity = 0.2;
+
+      [
+        { radius: 1.65, tube: 0.011, x: 1.1, y: 0.1, material: ringMaterial },
+        { radius: 2.15, tube: 0.008, x: 1.35, y: -0.2, material: warmRingMaterial },
+        { radius: 2.7, tube: 0.006, x: 1.0, y: 0.42, material: ringMaterial },
+      ].forEach((definition, index) => {
+        const ring = new Mesh(
+          new TorusGeometry(definition.radius, definition.tube, 6, 180),
+          definition.material,
+        );
+        ring.rotation.x = 1.08 + index * 0.31;
+        ring.rotation.y = 0.18 + index * 0.2;
+        ring.rotation.z = index * 0.47;
+        ring.position.set(definition.x, definition.y, -0.4 - index * 0.45);
+        orbitGroup.add(ring);
+      });
+
+      const wireframe = new LineSegments(
+        new EdgesGeometry(new IcosahedronGeometry(0.58, 1)),
+        new LineBasicMaterial({ color: '#f2d59d', transparent: true, opacity: 0.16, blending: AdditiveBlending }),
+      );
+      wireframe.position.set(2.75, -1.55, -0.7);
+      orbitGroup.add(wireframe);
+
+      const resize = () => {
+        const rect = host.getBoundingClientRect();
+        camera.aspect = Math.max(rect.width / Math.max(rect.height, 1), 0.1);
+        camera.updateProjectionMatrix();
+        renderer.setPixelRatio(Math.min(devicePixelRatio || 1, innerWidth < 700 ? 1.35 : 1.75));
+        renderer.setSize(rect.width, rect.height, false);
+        orbitGroup.position.x = innerWidth < 700 ? 0.35 : 1.45;
+        orbitGroup.position.y = innerWidth < 700 ? 0.7 : 0;
+        renderer.render(scene, camera);
+      };
+
+      const onPointerMove = (event: PointerEvent) => {
+        targetPointer.x = (event.clientX / innerWidth - 0.5) * 2;
+        targetPointer.y = (event.clientY / innerHeight - 0.5) * 2;
+      };
+
+      const render = () => {
+        const elapsed = (performance.now() - startedAt) / 1000;
+        pointer.lerp(targetPointer, 0.035);
+        world.rotation.y = pointer.x * 0.08 + elapsed * 0.012;
+        world.rotation.x = pointer.y * 0.045;
+        orbitGroup.rotation.z = elapsed * 0.045;
+        orbitGroup.rotation.y = Math.sin(elapsed * 0.22) * 0.12 + pointer.x * 0.08;
+        wireframe.rotation.x = elapsed * 0.09;
+        wireframe.rotation.y = elapsed * 0.12;
+        particles.rotation.z = elapsed * 0.006;
+        renderer.render(scene, camera);
+        host.dataset.threeReady = 'true';
+        if (active && !reducedMotion) frame = requestAnimationFrame(render);
+      };
+
+      addEventListener('resize', resize, { passive: true });
+      addEventListener('pointermove', onPointerMove, { passive: true });
+      document.addEventListener('visibilitychange', () => {
+        active = !document.hidden;
+        if (active && !reducedMotion) {
+          cancelAnimationFrame(frame);
+          frame = requestAnimationFrame(render);
+        }
+      });
+      addEventListener('pagehide', () => {
+        active = false;
+        cancelAnimationFrame(frame);
+        particleGeometry.dispose();
+        renderer.dispose();
+      }, { once: true });
+
+      resize();
+      render();
+    } catch {
+      host.dataset.threeFallback = 'true';
+    }
+  }
+</script>

@@ -1,7 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import GlassCard from '../components/GlassCard.astro';
+import HeroScene from '../components/HeroScene.astro';
 import PostCard from '../components/PostCard.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import { projects } from '../data/projects';
@@ -15,8 +15,9 @@ const latestPost = posts[0];
 
 <BaseLayout>
   <section class="hero">
-    <div class="container hero-grid">
-      <div class="hero-copy" data-reveal>
+    <HeroScene image={withBase(siteConfig.portrait)} />
+    <div class="container hero-shell">
+      <div class="hero-copy is-visible" data-reveal>
         <span class="eyebrow">{siteConfig.heroEyebrow}</span>
         <h1>{siteConfig.heroTitle.map((line) => <span>{line}</span>)}</h1>
         <p class="hero-description">{siteConfig.heroDescription}</p>
@@ -28,29 +29,15 @@ const latestPost = posts[0];
           {topics.map((topic) => <span class={`pill accent-${topic.accent}`}>{topic.icon} {topic.label}</span>)}
         </div>
       </div>
-
-      <div class="hero-visual" data-reveal>
-        <div class="orbital-stage" aria-hidden="true">
-          <div class="orbital-ring"></div>
-          <div class="hero-orb"></div>
-        </div>
-        {latestPost && (
-          <GlassCard class="floating-card floating-card--one" accent={latestPost.data.accent} href={withBase(`/blog/${latestPost.id}/`)}>
-            <div class="floating-card__meta">
-              <span><i class="signal"></i>NEW POST</span>
-              <span>{latestPost.data.category}</span>
-            </div>
-            <h3>{latestPost.data.title}</h3>
-            <p>{latestPost.data.description}</p>
-          </GlassCard>
-        )}
-        <GlassCard class="floating-card floating-card--two" accent="violet">
-          <div class="floating-card__meta"><span>NOW BUILDING</span><span>2026</span></div>
-          <h3>让 IP 动画创作流程自动运转</h3>
-          <p>角色一致性、分镜、配音与多平台导出。</p>
-        </GlassCard>
-      </div>
+      {latestPost && (
+        <a class="hero-latest" href={withBase(`/blog/${latestPost.id}/`)} data-reveal>
+          <span><i class="signal"></i>最新文章 · {latestPost.data.category}</span>
+          <strong>{latestPost.data.title}</strong>
+          <small>阅读文章 ↗</small>
+        </a>
+      )}
     </div>
+    <a class="hero-scroll" href="#featured" aria-label="继续浏览">SCROLL <span>↓</span></a>
   </section>
 
   <section class="section" id="featured">
@@ -81,8 +68,8 @@ const latestPost = posts[0];
   </section>
 
   <section class="section">
-    <div class="container">
-      <GlassCard class="about-panel" accent="mint">
+    <div class="container home-manifesto" data-reveal>
+      <div class="about-panel">
         <div>
           <span class="eyebrow">WHY I WRITE</span>
           <h2>把经验从“我好像知道”，变成下次能直接使用的系统。</h2>
@@ -94,7 +81,7 @@ const latestPost = posts[0];
           <div class="principle"><strong>让数据服务判断</strong><span>指标不是结果，而是行动线索。</span></div>
           <div class="principle"><strong>沉淀可复用流程</strong><span>把一次灵感变成稳定的生产能力。</span></div>
         </div>
-      </GlassCard>
+      </div>
     </div>
   </section>
 </BaseLayout>
