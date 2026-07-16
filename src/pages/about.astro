@@ -1,30 +1,34 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import GlassCard from '../components/GlassCard.astro';
-import { siteConfig, topics } from '../config';
+import { siteConfig, topics, withBase } from '../config';
 ---
 
 <BaseLayout title={`关于｜${siteConfig.name}`} description="关于驴驴小侠：在投放、经营、AI创作与代码之间持续实验。">
   <header class="page-hero container" data-reveal>
     <span class="eyebrow">ABOUT ME</span>
     <h1>你好，我是驴驴小侠。</h1>
-    <p>一个同时关心生意、内容和技术的人。我喜欢把复杂问题拆开，用数据看清方向，再用 AI 与代码提高执行速度。</p>
+    <p>一个同时关心生意、内容和技术的长期实践者。我喜欢把复杂问题拆开，用数据看清方向，再用 AI 与代码提高执行速度。</p>
   </header>
   <section class="section" style="padding-top: 30px">
     <div class="container">
-      <GlassCard class="about-panel" accent="violet">
-        <div>
+      <div class="about-profile" data-reveal>
+        <figure class="about-portrait">
+          <img src={withBase(siteConfig.portrait)} alt="驴驴小侠的毕业主题艺术肖像" width="1024" height="1536" />
+          <figcaption>从校园走向更大的世界，继续学习，也继续创造。</figcaption>
+        </figure>
+        <div class="about-profile__copy">
           <span class="eyebrow">PERSONAL LAB</span>
           <h2>这个博客，是我的公开实验记录。</h2>
-          <p>我会在这里写 B 站投放、电商运营、AI 内容生产、IP 动画和编程实现。文章尽量不堆术语，而是把决策依据、操作步骤与复盘结论讲清楚。</p>
+          <p>我会在这里写 B 站投放、电商运营、AI 内容生产、IP 动画和编程实现。我更在意真实过程，而不是漂亮结论：为什么这样判断、怎么执行、哪里做错了，以及下一次怎样做得更好。</p>
+          <p>希望这里最终不只是文章集合，而是一份持续生长的个人档案，也是一套能够反复使用的行动方法。</p>
           <div class="topic-row">{topics.map((topic) => <span class="pill">{topic.icon} {topic.label}</span>)}</div>
+          <div class="contact-block">
+            <span>联系与交流</span>
+            {siteConfig.emails.map((email) => <a href={`mailto:${email}`}>{email}</a>)}
+            <a href={siteConfig.socials.github} target="_blank" rel="noreferrer">GitHub · DonkeyLittleHero ↗</a>
+          </div>
         </div>
-        <div class="principle-list">
-          <div class="principle"><strong>当前关注</strong><span>IP 动画自动化、投放诊断与个人知识系统。</span></div>
-          <div class="principle"><strong>内容标准</strong><span>真实、可执行、说明边界，不把偶然当规律。</span></div>
-          <div class="principle"><strong>合作与交流</strong><span>可在 src/config.ts 中补充邮箱与社交主页。</span></div>
-        </div>
-      </GlassCard>
+      </div>
 
       <div class="timeline" data-reveal>
         <div class="timeline-item"><span>输入</span><div><strong>持续观察真实业务</strong><br />收集问题、数据、反馈与一线细节。</div></div>

@@ -1,89 +1,201 @@
 <div class="aurora-scene" aria-hidden="true">
-  <canvas id="particle-field"></canvas>
-  <div class="aurora aurora--one"></div>
-  <div class="aurora aurora--two"></div>
-  <div class="grid-plane"></div>
-  <div class="data-ribbon ribbon--one"></div>
-  <div class="data-ribbon ribbon--two"></div>
-  <div class="cursor-glow"></div>
+  <canvas id="site-webgl"></canvas>
+  <div class="space-horizon"></div>
+  <div class="space-axis"><span>01</span><span>DEPTH FIELD</span><span>Z+</span></div>
 </div>
 
 <script>
-  const scene = document.querySelector<HTMLElement>('.aurora-scene');
-  const canvas = document.querySelector<HTMLCanvasElement>('#particle-field');
-  const context = canvas?.getContext('2d');
-  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let width = 0;
-  let height = 0;
-  let animationFrame = 0;
-  let pointerX = 0.5;
-  let pointerY = 0.35;
-  interface Particle {
-    x: number;
-    y: number;
-    r: number;
-    speed: number;
-    alpha: number;
-    phase: number;
-  }
-  const particles: Particle[] = [];
+  import {
+    AdditiveBlending,
+    BoxGeometry,
+    BufferAttribute,
+    BufferGeometry,
+    Color,
+    EdgesGeometry,
+    Group,
+    IcosahedronGeometry,
+    LineBasicMaterial,
+    LineSegments,
+    Mesh,
+    MeshBasicMaterial,
+    OctahedronGeometry,
+    PerspectiveCamera,
+    Points,
+    PointsMaterial,
+    Scene,
+    TorusGeometry,
+    Vector2,
+    WebGLRenderer,
+  } from 'three';
 
-  const resize = () => {
-    if (!canvas || !context) return;
-    const ratio = Math.min(devicePixelRatio || 1, 2);
-    width = innerWidth;
-    height = innerHeight;
-    canvas.width = width * ratio;
-    canvas.height = height * ratio;
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
-    context.setTransform(ratio, 0, 0, ratio, 0, 0);
-    particles.length = 0;
-    const count = Math.min(100, Math.max(36, Math.floor(width / 17)));
-    for (let index = 0; index < count; index += 1) {
-      particles.push({
-        x: Math.random() * width,
-        y: Math.random() * height,
-        r: Math.random() * 1.25 + 0.2,
-        speed: Math.random() * 0.16 + 0.04,
-        alpha: Math.random() * 0.5 + 0.18,
-        phase: Math.random() * Math.PI * 2,
+  const canvas = document.querySelector<HTMLCanvasElement>('#site-webgl');
+  const host = canvas?.closest<HTMLElement>('.aurora-scene');
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (canvas && host) {
+    try {
+      const scene = new Scene();
+      const camera = new PerspectiveCamera(48, 1, 0.1, 60);
+      const renderer = new WebGLRenderer({
+        canvas,
+        alpha: true,
+        antialias: true,
+        powerPreference: 'high-performance',
       });
-    }
-  };
+      const world = new Group();
+      const corridor = new Group();
+      const objects = new Group();
+      const pointer = new Vector2();
+      const pointerTarget = new Vector2();
+      const startedAt = performance.now();
+      let targetScroll = 0;
+      let smoothScroll = 0;
+      let frame = 0;
+      let active = true;
 
-  const draw = (time = 0) => {
-    if (!context) return;
-    context.clearRect(0, 0, width, height);
-    particles.forEach((particle) => {
-      if (!reduced) {
-        particle.y -= particle.speed;
-        particle.x += Math.sin(time * 0.0002 + particle.phase) * 0.035;
-        if (particle.y < -4) {
-          particle.y = height + 4;
-          particle.x = Math.random() * width;
-        }
+      camera.position.set(0, 0, 7.4);
+      scene.add(world);
+      world.add(corridor, objects);
+
+      const count = innerWidth < 700 ? 520 : 1100;
+      const positions = new Float32Array(count * 3);
+      const colors = new Float32Array(count * 3);
+      const teal = new Color('#5ce1d0');
+      const gold = new Color('#e8bd72');
+      const violet = new Color('#c79af0');
+
+      for (let index = 0; index < count; index += 1) {
+        const offset = index * 3;
+        positions[offset] = (Math.random() - 0.5) * 13;
+        positions[offset + 1] = (Math.random() - 0.5) * 9;
+        positions[offset + 2] = Math.random() * -28 + 5;
+        const roll = Math.random();
+        const color = roll > 0.82 ? gold : roll > 0.7 ? violet : teal;
+        colors[offset] = color.r;
+        colors[offset + 1] = color.g;
+        colors[offset + 2] = color.b;
       }
-      const flicker = 0.65 + Math.sin(time * 0.001 + particle.phase) * 0.35;
-      context.beginPath();
-      context.fillStyle = `rgba(103, 232, 213, ${particle.alpha * flicker})`;
-      context.arc(particle.x, particle.y, particle.r, 0, Math.PI * 2);
-      context.fill();
-    });
-    if (!reduced) animationFrame = requestAnimationFrame(draw);
-  };
 
-  addEventListener('resize', resize, { passive: true });
-  addEventListener('pointermove', (event) => {
-    pointerX = event.clientX / innerWidth;
-    pointerY = event.clientY / innerHeight;
-    scene?.style.setProperty('--mx', `${pointerX * 100}%`);
-    scene?.style.setProperty('--my', `${pointerY * 100}%`);
-    scene?.style.setProperty('--px', `${(pointerX - 0.5) * 18}px`);
-    scene?.style.setProperty('--py', `${(pointerY - 0.5) * 12}px`);
-  }, { passive: true });
+      const particleGeometry = new BufferGeometry();
+      particleGeometry.setAttribute('position', new BufferAttribute(positions, 3));
+      particleGeometry.setAttribute('color', new BufferAttribute(colors, 3));
+      const particles = new Points(
+        particleGeometry,
+        new PointsMaterial({
+          size: innerWidth < 700 ? 0.035 : 0.028,
+          sizeAttenuation: true,
+          transparent: true,
+          opacity: 0.72,
+          vertexColors: true,
+          blending: AdditiveBlending,
+          depthWrite: false,
+        }),
+      );
+      world.add(particles);
 
-  resize();
-  draw();
-  addEventListener('pagehide', () => cancelAnimationFrame(animationFrame), { once: true });
+      const ringColors = ['#5ce1d0', '#e8bd72', '#c79af0'];
+      for (let index = 0; index < 9; index += 1) {
+        const ring = new Mesh(
+          new TorusGeometry(2.4 + (index % 3) * 0.56, 0.008 + (index % 2) * 0.003, 6, 160),
+          new MeshBasicMaterial({
+            color: ringColors[index % ringColors.length],
+            transparent: true,
+            opacity: 0.08 + (index % 3) * 0.025,
+            blending: AdditiveBlending,
+            depthWrite: false,
+          }),
+        );
+        ring.position.set(index % 2 ? 1.7 : -1.8, (index % 4 - 1.5) * 0.75, -index * 2.7 + 1);
+        ring.rotation.x = 0.94 + index * 0.13;
+        ring.rotation.y = index % 2 ? 0.28 : -0.28;
+        ring.rotation.z = index * 0.41;
+        corridor.add(ring);
+      }
+
+      const shapes = [
+        new BoxGeometry(0.72, 0.72, 0.72),
+        new IcosahedronGeometry(0.68, 1),
+        new OctahedronGeometry(0.7, 0),
+      ];
+      for (let index = 0; index < 9; index += 1) {
+        const shape = new LineSegments(
+          new EdgesGeometry(shapes[index % shapes.length]),
+          new LineBasicMaterial({
+            color: ringColors[(index + 1) % ringColors.length],
+            transparent: true,
+            opacity: 0.12 + (index % 3) * 0.045,
+            blending: AdditiveBlending,
+          }),
+        );
+        const side = index % 2 ? 1 : -1;
+        shape.position.set(side * (2.5 + (index % 3) * 0.7), (index % 5 - 2) * 1.05, -index * 2.4);
+        shape.rotation.set(index * 0.17, index * 0.23, index * 0.11);
+        objects.add(shape);
+      }
+
+      const updateScroll = () => {
+        const maxScroll = Math.max(document.documentElement.scrollHeight - innerHeight, 1);
+        targetScroll = scrollY / maxScroll;
+      };
+
+      const updatePointer = (event: PointerEvent) => {
+        pointerTarget.set((event.clientX / innerWidth - 0.5) * 2, (event.clientY / innerHeight - 0.5) * 2);
+      };
+
+      const resize = () => {
+        camera.aspect = innerWidth / Math.max(innerHeight, 1);
+        camera.updateProjectionMatrix();
+        renderer.setPixelRatio(Math.min(devicePixelRatio || 1, innerWidth < 700 ? 1.25 : 1.6));
+        renderer.setSize(innerWidth, innerHeight, false);
+        renderer.render(scene, camera);
+      };
+
+      const render = () => {
+        const elapsed = (performance.now() - startedAt) / 1000;
+        pointer.lerp(pointerTarget, 0.035);
+        smoothScroll += (targetScroll - smoothScroll) * 0.035;
+        camera.position.z = 7.4 - smoothScroll * 17;
+        camera.position.x = pointer.x * 0.18;
+        camera.position.y = -pointer.y * 0.12 + Math.sin(smoothScroll * Math.PI * 3) * 0.3;
+        world.rotation.y = pointer.x * 0.025 + smoothScroll * 0.15;
+        particles.rotation.z = elapsed * 0.004;
+        corridor.rotation.z = elapsed * 0.015 + smoothScroll * 0.7;
+        objects.children.forEach((object, index) => {
+          object.rotation.x += 0.0008 + index * 0.00005;
+          object.rotation.y += 0.001 + index * 0.00004;
+        });
+        renderer.render(scene, camera);
+        host.dataset.threeReady = 'true';
+        host.style.setProperty('--scroll-depth', `${smoothScroll}`);
+        if (active && !reducedMotion) frame = requestAnimationFrame(render);
+      };
+
+      addEventListener('resize', resize, { passive: true });
+      addEventListener('scroll', () => {
+        updateScroll();
+        if (reducedMotion) render();
+      }, { passive: true });
+      addEventListener('pointermove', updatePointer, { passive: true });
+      document.addEventListener('visibilitychange', () => {
+        active = !document.hidden;
+        if (active && !reducedMotion) {
+          cancelAnimationFrame(frame);
+          frame = requestAnimationFrame(render);
+        }
+      });
+      addEventListener('pagehide', () => {
+        active = false;
+        cancelAnimationFrame(frame);
+        particleGeometry.dispose();
+        shapes.forEach((shape) => shape.dispose());
+        renderer.dispose();
+      }, { once: true });
+
+      updateScroll();
+      resize();
+      render();
+    } catch {
+      host.dataset.threeFallback = 'true';
+    }
+  }
 </script>

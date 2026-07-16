@@ -42,6 +42,17 @@ npm run build
 
 ## 新增文章
 
+### 使用可视化后台（推荐）
+
+1. 打开 [Pages CMS](https://app.pagescms.org) 并使用仓库所有者的 GitHub 账号登录。
+2. 选择 `DonkeyLittleHero/lvxia-personal-blog` 仓库。
+3. 进入“文章管理”，新建或修改文章，可上传封面与正文图片。
+4. 保持“保存为草稿”开启时文章不会公开；关闭后保存会触发 GitHub Pages 自动发布。
+
+后台字段由仓库根目录的 `.pages.yml` 管理，文章内容仍以 Markdown 保存在 GitHub 中。
+
+### 手动新增
+
 在 `src/content/blog/` 新建 `.md` 文件：
 
 ```md

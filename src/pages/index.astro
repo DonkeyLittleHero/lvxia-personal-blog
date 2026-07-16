@@ -1,7 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import GlassCard from '../components/GlassCard.astro';
+import HeroScene from '../components/HeroScene.astro';
 import PostCard from '../components/PostCard.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import { projects } from '../data/projects';
@@ -10,212 +10,35 @@ import { siteConfig, topics, withBase } from '../config';
 const posts = (await getCollection('blog', ({ data }) => !data.draft))
   .sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
 const featuredPosts = posts.filter((post) => post.data.featured).slice(0, 3);
-const planetStations = [
-  {
-    id: 'blog',
-    title: '文章星球',
-    label: '复盘和方法论',
-    accent: '#25e7ff',
-    size: 184,
-    x: 66,
-    y: 30,
-    options: [
-      { label: '阅读最新文章', href: '/blog/' },
-      { label: '查看精选复盘', href: '/#featured' },
-      { label: '订阅 RSS', href: '/rss.xml' },
-    ],
-  },
-  {
-    id: 'projects',
-    title: '项目星球',
-    label: '正在构建',
-    accent: '#8d7cff',
-    size: 128,
-    x: 84,
-    y: 58,
-    options: [
-      { label: '项目列表', href: '/projects/' },
-      { label: 'IP 动画流水线', href: '/projects/' },
-      { label: '小游戏原型', href: '/projects/' },
-    ],
-  },
-  {
-    id: 'ai',
-    title: 'AI 创作星',
-    label: '自动化创作',
-    accent: '#62f6e4',
-    size: 104,
-    x: 47,
-    y: 64,
-    options: [
-      { label: 'AI 工作流文章', href: '/blog/ai-ip-animation-pipeline/' },
-      { label: '内容复盘流程', href: '/blog/content-review-loop/' },
-      { label: '查看项目沉淀', href: '/projects/' },
-    ],
-  },
-  {
-    id: 'data',
-    title: '数据星站',
-    label: '投放增长',
-    accent: '#ffbf69',
-    size: 92,
-    x: 76,
-    y: 76,
-    options: [
-      { label: 'B站投放清单', href: '/blog/bilibili-launch-checklist/' },
-      { label: '电商指标树', href: '/blog/ecommerce-metric-tree/' },
-      { label: '增长复盘', href: '/blog/' },
-    ],
-  },
-  {
-    id: 'about',
-    title: '身份星',
-    label: '认识我',
-    accent: '#73eab1',
-    size: 82,
-    x: 55,
-    y: 18,
-    options: [
-      { label: '关于驴驴小侠', href: '/about/' },
-      { label: '我的方法论', href: '/about/' },
-      { label: 'GitHub', href: siteConfig.socials.github },
-    ],
-  },
-];
+const latestPost = posts[0];
 ---
 
 <BaseLayout>
-  <section class="hero hero--lab" data-hero-scene style={`--hero-bg: url("${withBase('/hero-lab-bg.png')}")`}>
-    <div class="hero-light hero-light--cyan" aria-hidden="true"></div>
-    <div class="hero-light hero-light--violet" aria-hidden="true"></div>
-    <div class="hero-wave hero-wave--one" aria-hidden="true"></div>
-    <div class="hero-wave hero-wave--two" aria-hidden="true"></div>
-
-    <div class="container hero-grid">
-      <div class="hero-copy" data-reveal>
+  <section class="hero">
+    <HeroScene image={withBase(siteConfig.portrait)} />
+    <div class="container hero-shell">
+      <div class="hero-copy is-visible" data-reveal>
         <span class="eyebrow">{siteConfig.heroEyebrow}</span>
-        <h1 class="hero-title">
-          <span>在投放、AI与</span>
-          <span>代码之间，</span>
-          <span>记录真实增长</span>
-        </h1>
+        <h1>{siteConfig.heroTitle.map((line) => <span>{line}</span>)}</h1>
         <p class="hero-description">{siteConfig.heroDescription}</p>
         <div class="hero-actions">
           <a class="btn btn--primary" href={withBase('/blog/')}>阅读最新文章 <span>↗</span></a>
-          <a class="btn btn--ghost" href={withBase('/projects/')}>看看我的项目</a>
+          <a class="btn btn--ghost" href={withBase('/projects/')}>查看正在做的项目</a>
         </div>
         <div class="topic-row" aria-label="博客主题">
-          {topics.map((topic) => <a class={`pill hero-pill accent-${topic.accent}`} href={withBase('/blog/')}>{topic.icon} {topic.label}</a>)}
+          {topics.map((topic) => <span class={`pill accent-${topic.accent}`}>{topic.icon} {topic.label}</span>)}
         </div>
       </div>
-
-      <div class="hero-visual hero-visual--universe" data-reveal>
-        <div class="universe-stage" data-universe aria-label="可交互星球导航">
-          <div class="starfield starfield--near" aria-hidden="true"></div>
-          <div class="starfield starfield--far" aria-hidden="true"></div>
-          <div class="orbit-path orbit-path--one" aria-hidden="true"></div>
-          <div class="orbit-path orbit-path--two" aria-hidden="true"></div>
-          <div class="orbit-path orbit-path--three" aria-hidden="true"></div>
-
-          {planetStations.map((planet) => (
-            <button
-              class={`planet planet--${planet.id}`}
-              type="button"
-              data-planet={planet.id}
-              style={`--planet-x:${planet.x}%; --planet-y:${planet.y}%; --planet-size:${planet.size}px; --planet-accent:${planet.accent};`}
-              aria-expanded="false"
-              aria-controls={`planet-panel-${planet.id}`}
-            >
-              <span class="planet__halo" aria-hidden="true"></span>
-              <span class="planet__orbit" aria-hidden="true"></span>
-              <span class="planet__body" aria-hidden="true">
-                <span class="planet__shine"></span>
-                <span class="planet__scan"></span>
-              </span>
-              <span class="planet__label"><strong>{planet.title}</strong><small>{planet.label}</small></span>
-            </button>
-          ))}
-
-          {planetStations.map((planet) => (
-            <div
-              class={`planet-console planet-console--${planet.id}`}
-              id={`planet-panel-${planet.id}`}
-              data-console={planet.id}
-              style={`--planet-x:${planet.x}%; --planet-y:${planet.y}%; --planet-size:${planet.size}px; --planet-accent:${planet.accent};`}
-            >
-              <span class="console-kicker">FUNCTION DOCK</span>
-              <h3>{planet.title}</h3>
-              <p>{planet.label}：选择一个入口继续探索。</p>
-              <div class="console-actions">
-                {planet.options.map((option) => (
-                  <a href={option.href.startsWith('http') ? option.href : withBase(option.href)}>{option.label}<span>↗</span></a>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      {latestPost && (
+        <a class="hero-latest" href={withBase(`/blog/${latestPost.id}/`)} data-reveal>
+          <span><i class="signal"></i>最新文章 · {latestPost.data.category}</span>
+          <strong>{latestPost.data.title}</strong>
+          <small>阅读文章 ↗</small>
+        </a>
+      )}
     </div>
+    <a class="hero-scroll" href="#featured" aria-label="继续浏览">SCROLL <span>↓</span></a>
   </section>
-
-  <script>
-    const heroScene = document.querySelector<HTMLElement>('[data-hero-scene]');
-    const universe = document.querySelector<HTMLElement>('[data-universe]');
-    const planets = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-planet]'));
-    const consoles = Array.from(document.querySelectorAll<HTMLElement>('[data-console]'));
-    let activePlanet = '';
-
-    const closePlanet = () => {
-      activePlanet = '';
-      universe?.removeAttribute('data-active');
-      planets.forEach((planet) => {
-        planet.classList.remove('is-active');
-        planet.setAttribute('aria-expanded', 'false');
-      });
-      consoles.forEach((consolePanel) => consolePanel.classList.remove('is-active'));
-    };
-
-    const openPlanet = (id: string) => {
-      if (activePlanet === id) {
-        closePlanet();
-        return;
-      }
-      activePlanet = id;
-      universe?.setAttribute('data-active', id);
-      planets.forEach((planet) => {
-        const isActive = planet.dataset.planet === id;
-        planet.classList.toggle('is-active', isActive);
-        planet.setAttribute('aria-expanded', String(isActive));
-      });
-      consoles.forEach((consolePanel) => {
-        consolePanel.classList.toggle('is-active', consolePanel.dataset.console === id);
-      });
-    };
-
-    planets.forEach((planet) => {
-      planet.addEventListener('click', () => {
-        if (planet.dataset.planet) openPlanet(planet.dataset.planet);
-      });
-    });
-
-    addEventListener('keydown', (event) => {
-      if (event.key === 'Escape') closePlanet();
-    });
-
-    heroScene?.addEventListener('pointermove', (event) => {
-      const rect = heroScene.getBoundingClientRect();
-      const x = (event.clientX - rect.left) / rect.width;
-      const y = (event.clientY - rect.top) / rect.height;
-      heroScene.style.setProperty('--hero-x', `${(x - 0.5) * 24}px`);
-      heroScene.style.setProperty('--hero-y', `${(y - 0.5) * 18}px`);
-      heroScene.style.setProperty('--hero-glow-x', `${x * 100}%`);
-      heroScene.style.setProperty('--hero-glow-y', `${y * 100}%`);
-      universe?.style.setProperty('--fly-x', `${(x - 0.5) * 54}px`);
-      universe?.style.setProperty('--fly-y', `${(y - 0.5) * 40}px`);
-      universe?.style.setProperty('--tilt-x', `${(0.5 - y) * 8}deg`);
-      universe?.style.setProperty('--tilt-y', `${(x - 0.5) * 10}deg`);
-    }, { passive: true });
-  </script>
 
   <section class="section" id="featured">
     <div class="container">
@@ -245,8 +68,8 @@ const planetStations = [
   </section>
 
   <section class="section">
-    <div class="container">
-      <GlassCard class="about-panel" accent="mint">
+    <div class="container home-manifesto" data-reveal>
+      <div class="about-panel">
         <div>
           <span class="eyebrow">WHY I WRITE</span>
           <h2>把经验从“我好像知道”，变成下次能直接使用的系统。</h2>
@@ -258,7 +81,7 @@ const planetStations = [
           <div class="principle"><strong>让数据服务判断</strong><span>指标不是结果，而是行动线索。</span></div>
           <div class="principle"><strong>沉淀可复用流程</strong><span>把一次灵感变成稳定的生产能力。</span></div>
         </div>
-      </GlassCard>
+      </div>
     </div>
   </section>
 </BaseLayout>

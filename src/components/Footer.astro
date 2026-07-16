@@ -12,7 +12,8 @@ import { navItems, siteConfig, withBase } from '../config';
       {navItems.map((item) => <a href={withBase(item.href)}>{item.label}</a>)}
       <a href={withBase('/rss.xml')}>RSS</a>
       <a href={siteConfig.socials.github} target="_blank" rel="noreferrer">GitHub</a>
-      <a href={siteConfig.socials.bilibili} target="_blank" rel="noreferrer">Bilibili</a>
+      {siteConfig.socials.bilibili && <a href={siteConfig.socials.bilibili} target="_blank" rel="noreferrer">Bilibili</a>}
+      <a href={siteConfig.cmsUrl} target="_blank" rel="noreferrer">写文章</a>
       {siteConfig.email && <a href={`mailto:${siteConfig.email}`}>Email</a>}
     </div>
   </div>

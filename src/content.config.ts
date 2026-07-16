@@ -14,6 +14,8 @@ const blog = defineCollection({
     featured: z.boolean().default(false),
     draft: z.boolean().default(false),
     accent: z.enum(['cyan', 'violet', 'amber', 'mint']).default('cyan'),
+    coverImage: z.string().optional(),
+    coverAlt: z.string().optional(),
   }),
 });
 
