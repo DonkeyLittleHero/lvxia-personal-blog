@@ -12,6 +12,7 @@ interface Props {
   image?: string;
   type?: 'website' | 'article';
   publishedAt?: Date;
+  bodyClass?: string;
 }
 
 const {
@@ -20,6 +21,7 @@ const {
   image = withBase('/og.jpg'),
   type = 'website',
   publishedAt,
+  bodyClass = '',
 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site || Astro.url.origin);
@@ -53,9 +55,11 @@ const themeScript = `(() => { try { const saved = localStorage.getItem('theme');
     <title>{title}</title>
     <slot name="head" />
   </head>
-  <body>
+  <body class={bodyClass}>
     <a class="skip-link" href="#main-content">跳到正文</a>
     <AuroraBackground />
+    <div class="route-shutter" aria-hidden="true"></div>
+    <div class="lab-cursor" aria-hidden="true"><span></span></div>
     <ScrollProgress />
     <Nav />
     <main id="main-content">
@@ -64,6 +68,52 @@ const themeScript = `(() => { try { const saved = localStorage.getItem('theme');
     <Footer />
     <script is:inline>
       const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const finePointer = matchMedia('(pointer: fine)').matches;
+
+      if (finePointer && !reduceMotion) {
+        const cursor = document.querySelector('.lab-cursor');
+        let cursorX = innerWidth / 2;
+        let cursorY = innerHeight / 2;
+        let cursorTargetX = cursorX;
+        let cursorTargetY = cursorY;
+        let cursorFrame = 0;
+
+        const renderCursor = () => {
+          cursorX += (cursorTargetX - cursorX) * 0.18;
+          cursorY += (cursorTargetY - cursorY) * 0.18;
+          cursor?.style.setProperty('--cursor-x', `${cursorX}px`);
+          cursor?.style.setProperty('--cursor-y', `${cursorY}px`);
+          cursorFrame = requestAnimationFrame(renderCursor);
+        };
+
+        addEventListener('pointermove', (event) => {
+          cursorTargetX = event.clientX;
+          cursorTargetY = event.clientY;
+          document.documentElement.style.setProperty('--pointer-x', `${event.clientX / innerWidth - 0.5}`);
+          document.documentElement.style.setProperty('--pointer-y', `${event.clientY / innerHeight - 0.5}`);
+          cursor?.classList.add('is-active');
+        }, { passive: true });
+
+        document.querySelectorAll('a, button, [data-cursor]').forEach((target) => {
+          target.addEventListener('pointerenter', () => cursor?.classList.add('is-hovering'));
+          target.addEventListener('pointerleave', () => cursor?.classList.remove('is-hovering'));
+        });
+
+        document.querySelectorAll('[data-magnetic]').forEach((target) => {
+          target.addEventListener('pointermove', (event) => {
+            const rect = target.getBoundingClientRect();
+            target.style.setProperty('--magnetic-x', `${(event.clientX - rect.left - rect.width / 2) * 0.16}px`);
+            target.style.setProperty('--magnetic-y', `${(event.clientY - rect.top - rect.height / 2) * 0.16}px`);
+          });
+          target.addEventListener('pointerleave', () => {
+            target.style.setProperty('--magnetic-x', '0px');
+            target.style.setProperty('--magnetic-y', '0px');
+          });
+        });
+
+        renderCursor();
+        addEventListener('pagehide', () => cancelAnimationFrame(cursorFrame), { once: true });
+      }
 
       document.querySelectorAll('[data-tilt]').forEach((card) => {
         card.addEventListener('pointermove', (event) => {
@@ -104,6 +154,18 @@ const themeScript = `(() => { try { const saved = localStorage.getItem('theme');
           setTimeout(() => (button.textContent = '复制'), 1400);
         });
         pre.appendChild(button);
+      });
+
+      document.addEventListener('click', (event) => {
+        if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        const link = event.target instanceof Element ? event.target.closest('a[href]') : null;
+        if (!link || link.target === '_blank' || link.hasAttribute('download')) return;
+        const destination = new URL(link.href, location.href);
+        if (destination.origin !== location.origin || destination.protocol !== location.protocol) return;
+        if (destination.pathname === location.pathname && destination.search === location.search && destination.hash) return;
+        event.preventDefault();
+        document.body.classList.add('route-leaving');
+        setTimeout(() => location.assign(destination.href), reduceMotion ? 0 : 520);
       });
     </script>
   </body>
